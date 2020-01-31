@@ -31,7 +31,7 @@ public class CardDeliveryTest {
     SelenideElement buttonText = $(byText("Перепланировать"));
 
 
-    private String getFutureDate (int plusDate) {
+    private String getFutureDate(int plusDate) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.YYYY");
         LocalDate currentDate = LocalDate.now();
         LocalDate controlDate = currentDate.plusDays(plusDate);
@@ -54,7 +54,6 @@ public class CardDeliveryTest {
     @Test
     void shouldTest() {
         String address = faker.address().city();
-
         String surName = faker.name().lastName();
         String firstName = faker.name().firstName();
         String phoneNumber = faker.phoneNumber().phoneNumber();
@@ -77,7 +76,5 @@ public class CardDeliveryTest {
         replanNotification.waitUntil(visible, 15000);
         buttonText.click();
         replanNotification.waitUntil(exist, 15000);
-
     }
-
 }
