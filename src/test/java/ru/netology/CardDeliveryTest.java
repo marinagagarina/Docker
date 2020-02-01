@@ -3,33 +3,32 @@ package ru.netology;
 import com.codeborne.selenide.SelenideElement;
 import com.github.javafaker.Faker;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.Keys;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.Random;
 
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Selenide.*;
+import static ru.netology.DataGenerator.generateByCard;
 
 public class CardDeliveryTest {
     SelenideElement form = $("form");
-    SelenideElement city = form.$("[data-test-id=city] input");
+    SelenideElement cityForm = form.$("[data-test-id=city] input");
     SelenideElement cityClick = $(".menu");
-    SelenideElement cityChoose = $(byText("Казань"));
-    SelenideElement date = form.$("[data-test-id=date] input");
-    SelenideElement popupDate = $(".calendar");
-    SelenideElement deliveryDate = $(byText("8"));
-    SelenideElement name = form.$("[data-test-id=name] input");
-    SelenideElement phone = form.$("[data-test-id=phone] input");
-    SelenideElement agreement = form.$("[data-test-id=agreement]");
+    SelenideElement dateForm = form.$("[data-test-id=date] input");
+    SelenideElement nameForm = form.$("[data-test-id=name] input");
+    SelenideElement phoneForm = form.$("[data-test-id=phone] input");
+    SelenideElement agreementForm = form.$("[data-test-id=agreement]");
     SelenideElement button = $$("button").find(exactText("Запланировать"));
     SelenideElement notificationSuccess = $("[data-test-id='success-notification']");
     SelenideElement replanNotification = $("[data-test-id= 'replan-notification']");
-    SelenideElement buttonText = $(byText("Перепланировать"));
-
+    SelenideElement replanButton = $(byText("Перепланировать"));
 
     private String getFutureDate(int plusDate) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.YYYY");
@@ -39,6 +38,12 @@ public class CardDeliveryTest {
         return formattedControlDate;
     }
 
+    private String getRandomCity() {
+        String[] cities = {"Ульяновск", "Казань", "Самара", "Калуга", "Екатеринбург"};
+        Random random = new Random();
+        int index = random.nextInt(cities.length);
+        return (cities[index]);
+    }
     private Faker faker;
 
     @BeforeEach
@@ -51,30 +56,29 @@ public class CardDeliveryTest {
         open("http://localhost:9999");
     }
 
+    @DisplayName("test success if delivery date change")
     @Test
-    void shouldTest() {
-        String address = faker.address().city();
-        String surName = faker.name().lastName();
-        String firstName = faker.name().firstName();
+    void shouldChangeDeliveryDate() {
+        String randomCity = getRandomCity();
+        UserNameInfo userFullName = generateByCard();
         String phoneNumber = faker.phoneNumber().phoneNumber();
 
-        //city.setValue(address);
-        city.setValue("Москва");
+        cityForm.setValue(randomCity);
         cityClick.waitUntil(exist, 5000).click();
-        date.doubleClick().sendKeys(Keys.BACK_SPACE);
+        dateForm.doubleClick().sendKeys(Keys.BACK_SPACE);
         String futureDay = getFutureDate(3);
-        date.setValue(futureDay);
-        name.setValue(surName + " " + firstName);
-        phone.setValue(phoneNumber);
-        agreement.click();
+        dateForm.setValue(futureDay);
+        nameForm.setValue(String.valueOf(userFullName));
+        phoneForm.setValue(phoneNumber);
+        agreementForm.click();
         button.click();
         notificationSuccess.waitUntil(visible, 15000);
-        date.doubleClick().sendKeys(Keys.BACK_SPACE);
+        dateForm.doubleClick().sendKeys(Keys.BACK_SPACE);
         String newFutureDay = getFutureDate(5);
-        date.setValue(newFutureDay);
+        dateForm.setValue(newFutureDay);
         button.click();
         replanNotification.waitUntil(visible, 15000);
-        buttonText.click();
+        replanButton.click();
         replanNotification.waitUntil(exist, 15000);
     }
 }
