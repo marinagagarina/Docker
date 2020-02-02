@@ -7,10 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.Keys;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Locale;
-import java.util.Random;
 
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selectors.byText;
@@ -30,20 +27,6 @@ public class CardDeliveryTest {
     SelenideElement replanNotification = $("[data-test-id= 'replan-notification']");
     SelenideElement replanButton = $(byText("Перепланировать"));
 
-    private String getFutureDate(int plusDate) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.YYYY");
-        LocalDate currentDate = LocalDate.now();
-        LocalDate controlDate = currentDate.plusDays(plusDate);
-        String formattedControlDate = controlDate.format(formatter);
-        return formattedControlDate;
-    }
-
-    private String getRandomCity() {
-        String[] cities = {"Ульяновск", "Казань", "Самара", "Калуга", "Екатеринбург"};
-        Random random = new Random();
-        int index = random.nextInt(cities.length);
-        return (cities[index]);
-    }
     private Faker faker;
 
     @BeforeEach
@@ -59,23 +42,21 @@ public class CardDeliveryTest {
     @DisplayName("test success if delivery date change")
     @Test
     void shouldChangeDeliveryDate() {
-        String randomCity = getRandomCity();
+        String randomCity = DataGenerator.getRandomCity();
         UserNameInfo userFullName = generateByCard();
         String phoneNumber = faker.phoneNumber().phoneNumber();
 
         cityForm.setValue(randomCity);
         cityClick.waitUntil(exist, 5000).click();
         dateForm.doubleClick().sendKeys(Keys.BACK_SPACE);
-        String futureDay = getFutureDate(3);
-        dateForm.setValue(futureDay);
+        dateForm.setValue(DataGenerator.getFutureDate(3));
         nameForm.setValue(String.valueOf(userFullName));
         phoneForm.setValue(phoneNumber);
         agreementForm.click();
         button.click();
         notificationSuccess.waitUntil(visible, 15000);
         dateForm.doubleClick().sendKeys(Keys.BACK_SPACE);
-        String newFutureDay = getFutureDate(5);
-        dateForm.setValue(newFutureDay);
+        dateForm.setValue(DataGenerator.getFutureDate(5));
         button.click();
         replanNotification.waitUntil(visible, 15000);
         replanButton.click();
